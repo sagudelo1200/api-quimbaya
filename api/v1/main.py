@@ -1,9 +1,8 @@
-from typing import Optional
-
+#!/usr/bin/env python3
+from api.v1.routers import router
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
-from api.v1.routers import router
+from typing import Optional
 
 app = FastAPI(title='API Quimbaya',
               description='REST API for the administration of Scout groups',
@@ -16,6 +15,7 @@ app.add_middleware(
     allow_origins=['*'],
     allow_headers=['*']
 )
+
 
 @app.get('/')
 def read_root():
