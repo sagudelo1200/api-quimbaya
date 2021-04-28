@@ -14,7 +14,7 @@ ftime = '%Y-%m-%dT%H:%M:%S.%f'
 class BaseModel():
     '''[The BaseModel class from which future classes will be derived]
     '''
-    id = Column(String(30), primary_key=True, nullable=False)
+    id = Column(String(32), primary_key=True, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
@@ -47,6 +47,8 @@ class BaseModel():
         if new_dict.get('password'):
             new_dict['password'] = 'PROTECTED-DATA'
 
+        new_dict.pop('_sa_instance_state', None)
+
         return f'[{self.__class__.__name__}] ({self.id}) {new_dict}'
 
     def __repr__(self) -> str:
@@ -60,8 +62,7 @@ class BaseModel():
             new_dict['created_at'] = new_dict['created_at'].strftime(ftime)
         if 'updated_at' in new_dict:
             new_dict['updated_at'] = new_dict['updated_at'].strftime(ftime)
-        if '_sa_instance_state' in new_dict:
-            del new_dict['_sa_instance_state']
+        new_dict.pop('_sa_instance_state', None)
         new_dict['__class__'] = self.__class__.__name__
 
         if not show_passwords:
