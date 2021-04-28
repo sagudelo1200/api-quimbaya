@@ -1,13 +1,27 @@
 #!/usr/bin/env python3
 from models.base_model import Base
+from models.clan import Clan
+from models.concejo import Concejo
+from models.familia import Familia
+from models.jefatura import Jefatura
+from models.manada import Manada
+from models.sociedad import Sociedad
+from models.tropa import Tropa
 from models.user import User
 from os import getenv
 from sqlalchemy import create_engine
+from sqlalchemy import select
 from sqlalchemy.orm import scoped_session, sessionmaker
 import models
 import sqlalchemy
 
-classes = {'User': User}
+USER_CLASSES = {
+    'Familia': Familia, 'Manada': Manada,
+    'Tropa': Tropa, 'Sociedad': Sociedad, 'Clan': Clan,
+    'Jefatura': Jefatura, 'Concejo': Concejo
+}
+
+CLASSES = dict(**USER_CLASSES)
 
 
 class DBStorage:
@@ -39,11 +53,17 @@ class DBStorage:
         '''[query on the current database session]
         '''
         _dict = {}
-        for clss in classes:
-            if not cls or cls is classes[clss] or cls is clss:
-                objs = self.__session.query(classes[clss]).all()
+        for clss in CLASSES:
+            model = CLASSES[clss]
+            if not cls or cls is model or cls is clss:
+                objs = self.__session.query(model).all()
                 for obj in objs:
-                    key = obj.__class__.__name__ + '.' + obj.id
+                    class_name = obj.__class__.__name__
+                    if class_name in USER_CLASSES:
+                        obj.username = obj.id
+                        obj.unit = class_name.lower()
+                        obj.full_name = f'{obj.name} {obj.last_name}'
+                    key = f'{class_name}.{obj.id}'
                     _dict[key] = obj
         return (_dict)
 
@@ -56,13 +76,16 @@ class DBStorage:
         Returns the object based on the class name and its ID, or
         None if not found
         '''
-        if cls not in classes and cls not in classes.values():
+        if cls not in CLASSES and cls not in CLASSES.values():
             return None
-
-        for value in models.storage.all(cls).values():
-            if (value.id == id):
-                return value
-
+        objs = models.storage.all(cls)
+        for obj in objs.values():
+            if obj.id == id:
+                if cls in USER_CLASSES or cls in USER_CLASSES.values():
+                    obj.username = id
+                    obj.unit = obj.__class__.__name__.lower()
+                    obj.full_name = obj.name + ' ' + obj.last_name
+                return obj
         return None
 
     def new(self, obj):
@@ -98,8 +121,8 @@ class DBStorage:
         '''
         count = 0
         if cls:
-            count = len(models.storage.all(cls).values())
+            count = len(models.storage.all(cls))
         else:
-            for clss in classes:
-                count += len(models.storage.all(clss).values())
+            for clss in CLASSES:
+                count += len(models.storage.all(clss))
         return count
