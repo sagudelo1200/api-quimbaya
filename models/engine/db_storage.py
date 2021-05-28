@@ -61,7 +61,7 @@ class DBStorage:
                     class_name = obj.__class__.__name__
                     if class_name in USER_CLASSES:
                         obj.username = obj.id
-                        obj.unit = class_name.lower()
+                        obj.unit = class_name
                         obj.full_name = f'{obj.name} {obj.last_name}'
                     key = f'{class_name}.{obj.id}'
                     _dict[key] = obj
@@ -83,7 +83,7 @@ class DBStorage:
             if obj.id == id:
                 if cls in USER_CLASSES or cls in USER_CLASSES.values():
                     obj.username = id
-                    obj.unit = obj.__class__.__name__.lower()
+                    obj.unit = obj.__class__.__name__
                     obj.full_name = obj.name + ' ' + obj.last_name
                 return obj
         return None

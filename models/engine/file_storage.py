@@ -58,7 +58,7 @@ class FileStorage:
                 jo = json.load(f)
             for key in jo:
                 self.__objects[key] = classes[jo[key]['__class__']](**jo[key])
-        except Exception:
+        except Exception as e:
             raise OSError(f'Could not read {self.__file_path} file\n\t{e}')
 
     def delete(self, obj):
@@ -80,9 +80,9 @@ class FileStorage:
         if cls not in classes and cls not in classes.values():
             return None
 
-        for value in models.storage.all(cls).values():
-            if (value.id == id):
-                return value
+        for obj in models.storage.all(cls).values():
+            if (obj.id == id):
+                return obj
 
         return None
 
